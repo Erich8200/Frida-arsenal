@@ -1,3 +1,6 @@
+var target_lib_name = ""
+var target_offset = 0x00
+
 function hook_dlopen() {
   Interceptor.attach(Module.findExportByName(null, "android_dlopen_ext"),
   {
@@ -8,7 +11,7 @@ function hook_dlopen() {
               
               console.log(path);
 
-              if (path.indexOf('libszstone.so') >= 0) {
+              if (path.indexOf(target_lib_name) >= 0) {
                   this.can_Hook = true;
               }
 
@@ -16,31 +19,22 @@ function hook_dlopen() {
       },
       onLeave: function (retval) {
 
-          // if (this.can_Hook) {
-              
-          //     var base_addr = Process.findModuleByName("libGameVMP.so").base;
+        //// For Acalanatha ntrace
+        // if (this.can_Hook) {
+        //     var base_addr = Process.findModuleByName("libGameVMP.so").base;
+        //     var start_addr = base_addr.add(0xDFA8);
+        //     var end_addr = base_addr.add(0xDFE4);
+        //     // console.log('./ntrace ' + Process.id + " -s " + start_addr + " -e " + end_addr + " -b blib_pixel3.txt -o native_trace.txt -x");
+        // }
 
-          //     // Patch
-          //     var start_addr = base_addr.add(0xDFA8);
-          //     var end_addr = base_addr.add(0xDFE4);
-          //     // console.log('./ntrace ' + Process.id + " -s " + start_addr + " -e " + end_addr + " -b blib_pixel3.txt -o native_trace.txt -x");
-
-
-          // }
-
-          if (this.can_Hook) {
-              var base_addr = Process.findModuleByName("libszstone.so").base;
-              var addr = base_addr.add(0x447F8);
-              Interceptor.attach(addr, function (args) {
-                  console.log("0x447F8--->" + ptr(this.context["x8"]).sub(base_addr));
-              });
-
-              addr = base_addr.add(0x44748);
-              Interceptor.attach(addr, function (args) {
-                  console.log("0x44748--->" + ptr(this.context["x8"]).sub(base_addr));
-              });
-              
-          }
+        if (this.can_Hook) {
+            var base_addr = Process.findModuleByName(target_lib_name).base;
+            var addr = base_addr.add(target_offset);
+            Interceptor.attach(addr, function (args) {
+                console.log(target_offset);
+            });
+            
+        }
       
       }
   });
